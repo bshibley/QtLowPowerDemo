@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/toradexlogo.png</file>
+        <file>images/shutdown.png</file>
+        <file>images/sleep.png</file>
+    </qresource>
+</RCC>
