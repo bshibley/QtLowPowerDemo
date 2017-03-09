@@ -181,6 +181,7 @@ void LpdGraphs::setupCharts()
     hboxChartLayout->setSpacing(0);
     hboxChartLayout->setMargin(0);
     hboxChartLayout->setContentsMargins(0,0,0,0);
+    hgroupChartBox->setFixedHeight(360);
     hgroupChartBox->setLayout(hboxChartLayout);
 }
 
