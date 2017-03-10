@@ -162,7 +162,7 @@ void LpdGraphs::setupCharts()
     pal.setColor(QPalette::Base, QRgb(0x414147));
     chartLabel->setPalette(pal);
 
-    chartLabelFont.setPixelSize(15);
+    chartLabelFont.setPixelSize(16);
     chartLabelFont.setBold(true);
     chartLabel->setFont(chartLabelFont);
 
@@ -360,30 +360,35 @@ void LpdGraphs::handleButtonColorChange(int button)
 
 void LpdGraphs::handleChartLabelText(int graph)
 {
+    chartLabel->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    chartLabel->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     switch (graph) {
     case accl:
-        chartLabel->setTextColor(graphSeries1->pen().color());
-        chartLabel->setText("\nX [m/s^2]");
-        chartLabel->setTextColor(graphSeries2->pen().color());
-        chartLabel->append("\nY [m/s^2]");
-        chartLabel->setTextColor(graphSeries3->pen().color());
-        chartLabel->append("\nZ [m/s^2]");
+        chartLabel->clear();
+        /* Use HTML hackery since use of superscript is not possible with plain text */
+        chartLabel->append("<p style=\"line-height: 50\"><font size=\"3\">"
+                           "<font color=#38ad6b><br>&nbsp;&nbsp;&nbsp;X m/s<sup>2<br><br><br><br>");
+        chartLabel->append("<font size=\"3\"><font color=#3c84a7>&nbsp;&nbsp;&nbsp;Y m/s<sup>2<br><br><br>");
+        chartLabel->append("<font size=\"3\"><font color=#eb8817>&nbsp;Z m/s<sup>2</p>");
+
         break;
     case gyro:
+        chartLabel->clear();
         chartLabel->setTextColor(graphSeries1->pen().color());
-        chartLabel->setText("\n   gX °/s");
+        chartLabel->setText("\n   X °/s");
         chartLabel->setTextColor(graphSeries2->pen().color());
-        chartLabel->append("\n   gY °/s");
+        chartLabel->append("\n   Y °/s");
         chartLabel->setTextColor(graphSeries3->pen().color());
-        chartLabel->append("\n   gZ °/s");
+        chartLabel->append("\n   Z °/s");
         break;
     case magneto:
+        chartLabel->clear();
         chartLabel->setTextColor(graphSeries1->pen().color());
-        chartLabel->setText("\n     gX  °");
+        chartLabel->setText("\n     X  °");
         chartLabel->setTextColor(graphSeries2->pen().color());
-        chartLabel->append("\n     gY  °");
+        chartLabel->append("\n     Y  °");
         chartLabel->setTextColor(graphSeries3->pen().color());
-        chartLabel->append("\n     gZ  °");
+        chartLabel->append("\n     Z  °");
         break;
     case alti:
         break;
@@ -405,7 +410,7 @@ void LpdGraphs::handleGyroButton()
     accButton->setDown(false);
     magnetoButton->setDown(false);
     altiButton->setDown(false);
-    chart->axisY()->setRange(-100, 100);
+    chart->axisY()->setRange(-180, 180);
     /* Ask M4 to send Gyroscope data */
     emit m4_sendCommand("gyro");
 }
@@ -422,7 +427,7 @@ void LpdGraphs::handleAccButton()
     accButton->setDown(true);
     magnetoButton->setDown(false);
     altiButton->setDown(false);
-    chart->axisY()->setRange(-1000, 1000);
+    chart->axisY()->setRange(-4, 4);
     /* Ask M4 to send Accelerometer data */
     emit m4_sendCommand("acc");
 }
@@ -439,7 +444,7 @@ void LpdGraphs::handleMagnetoButton()
     accButton->setDown(false);
     magnetoButton->setDown(true);
     altiButton->setDown(false);
-    chart->axisY()->setRange(-10, 70);
+    chart->axisY()->setRange(-90, 90);
     /* Ask M4 to send Magnetometer data */
     emit m4_sendCommand("mag");
 }
