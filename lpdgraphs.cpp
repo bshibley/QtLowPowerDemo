@@ -30,13 +30,13 @@ void LpdGraphs::setupButtons()
     gyroButton = new QPushButton(tr("Gyroscope"));
     accButton = new QPushButton(tr("Accelerometer"));
     magnetoButton = new QPushButton(tr("Magnetometer"));
-    altiButton = new QPushButton(tr("Altimeter"));
+    pmButton = new QPushButton(tr("Power Managment"));
     sleepButton = new QPushButton();
     shutdownButton = new QPushButton();
     connect(gyroButton, SIGNAL(released()), this, SLOT(handleGyroButton()));
     connect(accButton, SIGNAL(released()), this, SLOT(handleAccButton()));
     connect(magnetoButton, SIGNAL(released()), this, SLOT(handleMagnetoButton()));
-    connect(altiButton, SIGNAL(released()), this, SLOT(handleAltiButton()));
+    connect(pmButton, SIGNAL(released()), this, SLOT(handlePmButton()));
     connect(sleepButton, SIGNAL(released()), this, SLOT(handleSleepButton()));
     connect(shutdownButton, SIGNAL(released()), this, SLOT(handleShutdownButton()));
 
@@ -54,14 +54,14 @@ void LpdGraphs::setupButtons()
     gyroButton->setFont(buttonFont);
     accButton->setFont(buttonFont);
     magnetoButton->setFont(buttonFont);
-    altiButton->setFont(buttonFont);
+    pmButton->setFont(buttonFont);
     sleepButton->setFont(buttonFont);
     shutdownButton->setFont(buttonFont);
 
     gyroButton->setFixedHeight(40);
     accButton->setFixedHeight(40);
     magnetoButton->setFixedHeight(40);
-    altiButton->setFixedHeight(40);
+    pmButton->setFixedHeight(40);
 
     sleepButton->setFixedWidth(80);
     sleepButton->setFixedHeight(80);
@@ -86,16 +86,16 @@ void LpdGraphs::setupButtons()
     bPalette.setColor(QPalette::ButtonText, Qt::white);
     magnetoButton->setPalette(bPalette);
 
-    altiButton->setAutoFillBackground(true);
-    bPalette = altiButton->palette();
+    pmButton->setAutoFillBackground(true);
+    bPalette = pmButton->palette();
     bPalette.setColor(QPalette::Button, QRgb(0x00508c));
     bPalette.setColor(QPalette::ButtonText, Qt::white);
-    altiButton->setPalette(bPalette);
+    pmButton->setPalette(bPalette);
 
     gyroButton->setContentsMargins(0,0,0,0);
     accButton->setContentsMargins(0,0,0,0);
     magnetoButton->setContentsMargins(0,0,0,0);
-    altiButton->setContentsMargins(0,0,0,0);
+    pmButton->setContentsMargins(0,0,0,0);
     sleepButton->setContentsMargins(0,0,0,0);
     shutdownButton->setContentsMargins(0,0,0,0);
 }
@@ -110,45 +110,132 @@ void LpdGraphs::setupHBoxLayout()
     hgroupBox->setContentsMargins(0,0,0,0);
     hgroupBox->setFixedHeight(40);
     hboxLayout->addWidget(accButton);
-    /*hboxLayout->addWidget(altiButton);*/
     hboxLayout->addWidget(gyroButton);
     hboxLayout->addWidget(magnetoButton);
+    hboxLayout->addWidget(pmButton);
     hgroupBox->setLayout(hboxLayout);
 }
 
 void LpdGraphs::setupCharts()
 {
-    chart = new QChart(this);
-    chart->legend()->setVisible(true);
-    chart->legend()->setAlignment(Qt::AlignBottom);
+    chartAcc = new QChart(this);
+    chartAcc->legend()->setVisible(true);
+    chartAcc->legend()->setAlignment(Qt::AlignBottom);
 
-    graphSeries1 = new QSplineSeries(chart);
-    chart->addSeries(graphSeries1);
-    graphSeries2 = new QSplineSeries(chart);
-    chart->addSeries(graphSeries2);
-    graphSeries3 = new QSplineSeries(chart);
-    chart->addSeries(graphSeries3);
+    chartMag = new QChart(this);
+    chartMag->legend()->setVisible(true);
+    chartMag->legend()->setAlignment(Qt::AlignBottom);
 
-    axisX = new QValueAxis;
-    chart->createDefaultAxes();
-    chart->setAxisX(axisX, graphSeries1);
-    chart->setAxisX(axisX, graphSeries2);
-    chart->setAxisX(axisX, graphSeries3);
-    axisX->setTickCount(X_RANGE_MAX);
-    chart->axisX()->setRange(0, X_RANGE_MAX);
-    chart->axisX()->hide();
-    chart->axisY()->setRange(-100, 100);
-    chart->setContentsMargins(0,0,0,0);
-    chart->legend()->hide();
+    chartGyr = new QChart(this);
+    chartGyr->legend()->setVisible(true);
+    chartGyr->legend()->setAlignment(Qt::AlignBottom);
 
-    chartView = new QChartView(chart);
-    chartView->setRenderHint(QPainter::Antialiasing);
-    chartView->setContentsMargins(0,0,0,0);
+    chartPm = new QChart(this);
+    chartPm->legend()->setVisible(true);
+    chartPm->legend()->setAlignment(Qt::AlignBottom);
 
+    graphSeriesAcc[0] = new QSplineSeries(chartAcc);
+    graphSeriesAcc[1] = new QSplineSeries(chartAcc);
+    graphSeriesAcc[2] = new QSplineSeries(chartAcc);
+
+    graphSeriesMag[0] = new QSplineSeries(chartMag);
+    graphSeriesMag[1] = new QSplineSeries(chartMag);
+    graphSeriesMag[2] = new QSplineSeries(chartMag);
+
+    graphSeriesGyr[0] = new QSplineSeries(chartGyr);
+    graphSeriesGyr[1] = new QSplineSeries(chartGyr);
+    graphSeriesGyr[2] = new QSplineSeries(chartGyr);
+
+    graphSeriesPm[0] = new QSplineSeries(chartPm);
+    graphSeriesPm[1] = new QSplineSeries(chartPm);
+    graphSeriesPm[2] = new QSplineSeries(chartPm);
+
+    chartAcc->addSeries(graphSeriesAcc[0]);
+    chartAcc->addSeries(graphSeriesAcc[1]);
+    chartAcc->addSeries(graphSeriesAcc[2]);
+
+    chartMag->addSeries(graphSeriesMag[0]);
+    chartMag->addSeries(graphSeriesMag[1]);
+    chartMag->addSeries(graphSeriesMag[2]);
+
+    chartGyr->addSeries(graphSeriesGyr[0]);
+    chartGyr->addSeries(graphSeriesGyr[1]);
+    chartGyr->addSeries(graphSeriesGyr[2]);
+
+    chartPm->addSeries(graphSeriesPm[0]);
+    chartPm->addSeries(graphSeriesPm[1]);
+    chartPm->addSeries(graphSeriesPm[2]);
+
+    axisXAcc = new QValueAxis;
+    chartAcc->createDefaultAxes();
+    chartAcc->setAxisX(axisXAcc, graphSeriesAcc[0]);
+    chartAcc->setAxisX(axisXAcc, graphSeriesAcc[1]);
+    chartAcc->setAxisX(axisXAcc, graphSeriesAcc[2]);
+    axisXAcc->setTickCount(X_RANGE_MAX);
+    chartAcc->axisX()->setRange(0, X_RANGE_MAX);
+    chartAcc->axisX()->hide();
+    chartAcc->setContentsMargins(0,0,0,0);
+    chartAcc->legend()->hide();
+
+    chartAccView = new QChartView(chartAcc);
+    chartAccView->setRenderHint(QPainter::Antialiasing);
+    chartAccView->setContentsMargins(0,0,0,0);
+
+    axisXMag = new QValueAxis;
+    chartMag->createDefaultAxes();
+    chartMag->setAxisX(axisXMag, graphSeriesMag[0]);
+    chartMag->setAxisX(axisXMag, graphSeriesMag[1]);
+    chartMag->setAxisX(axisXMag, graphSeriesMag[2]);
+    axisXMag->setTickCount(X_RANGE_MAX);
+    chartMag->axisX()->setRange(0, X_RANGE_MAX);
+    chartMag->axisX()->hide();
+    chartMag->setContentsMargins(0,0,0,0);
+    chartMag->legend()->hide();
+
+    chartMagView = new QChartView(chartMag);
+    chartMagView->setRenderHint(QPainter::Antialiasing);
+    chartMagView->setContentsMargins(0,0,0,0);
+
+    axisXGyr = new QValueAxis;
+    chartGyr->createDefaultAxes();
+    chartGyr->setAxisX(axisXGyr, graphSeriesGyr[0]);
+    chartGyr->setAxisX(axisXGyr, graphSeriesGyr[1]);
+    chartGyr->setAxisX(axisXGyr, graphSeriesGyr[2]);
+    axisXGyr->setTickCount(X_RANGE_MAX);
+    chartGyr->axisX()->setRange(0, X_RANGE_MAX);
+    chartGyr->axisX()->hide();
+    chartGyr->setContentsMargins(0,0,0,0);
+    chartGyr->legend()->hide();
+
+    chartGyrView = new QChartView(chartGyr);
+    chartGyrView->setRenderHint(QPainter::Antialiasing);
+    chartGyrView->setContentsMargins(0,0,0,0);
+
+    axisXPm = new QValueAxis;
+    chartPm->createDefaultAxes();
+    chartPm->setAxisX(axisXPm, graphSeriesPm[0]);
+    chartPm->setAxisX(axisXPm, graphSeriesPm[1]);
+    chartPm->setAxisX(axisXPm, graphSeriesPm[2]);
+    axisXPm->setTickCount(X_RANGE_MAX);
+    chartPm->axisX()->setRange(0, X_RANGE_MAX);
+    chartPm->axisX()->hide();
+    chartPm->setContentsMargins(0,0,0,0);
+    chartPm->legend()->hide();
+
+    chartPmView = new QChartView(chartPm);
+    chartPmView->setRenderHint(QPainter::Antialiasing);
+    chartPmView->setContentsMargins(0,0,0,0);
+
+    stackedWidget = new QStackedWidget;
     hgroupChartBox = new QGroupBox;
     hboxChartLayout = new QHBoxLayout;
     vgroupChartBox = new QGroupBox;
     vboxChartLayout = new QVBoxLayout;
+
+    stackedWidget->insertWidget(accl, chartAccView);
+    stackedWidget->insertWidget(magneto, chartMagView);
+    stackedWidget->insertWidget(gyro, chartGyrView);
+    stackedWidget->insertWidget(power, chartPmView);
 
     chartLabel = new QTextEdit;
     chartLabel->setReadOnly(true);
@@ -177,7 +264,7 @@ void LpdGraphs::setupCharts()
     vgroupChartBox->setLayout(vboxChartLayout);
 
     hboxChartLayout->addWidget(vgroupChartBox);
-    hboxChartLayout->addWidget(chartView);
+    hboxChartLayout->addWidget(stackedWidget);
     hboxChartLayout->setSpacing(0);
     hboxChartLayout->setMargin(0);
     hboxChartLayout->setContentsMargins(0,0,0,0);
@@ -202,7 +289,10 @@ void LpdGraphs::setupMainWindow()
     QPalette pal = window->palette();
     pal.setColor(QPalette::Window, QRgb(0x121218));
     pal.setColor(QPalette::WindowText, QRgb(0xd6d6d6));
-    chart->setTheme(QChart::ChartThemeDark);
+    chartAcc->setTheme(QChart::ChartThemeDark);
+    chartMag->setTheme(QChart::ChartThemeDark);
+    chartGyr->setTheme(QChart::ChartThemeDark);
+    chartPm->setTheme(QChart::ChartThemeDark);
     window->setPalette(pal);
 
     window->setLayout(vboxLayout);
@@ -219,7 +309,7 @@ void LpdGraphs::initialiseView()
     setupMainWindow();
     openSleepFile();
 
-    QMetaObject::invokeMethod(accButton, "released");
+    QMetaObject::invokeMethod(pmButton, "released");
     m_x = 0;
 }
 
@@ -230,8 +320,98 @@ LpdGraphs::~LpdGraphs()
         sleepFile.close();
 }
 
-void LpdGraphs::m4_processData(const QString &str)
+void LpdGraphs::m4_processData(const QByteArray &str)
 {
+    qreal acc[3], mag[3], gyr[3], power, current;
+    int i = 0;
+    //  qInfo("received %d bytes 7 %X 8 %X", str.count(), str.at(7), str.at(8));
+    while(str.count() >= (24 + 24*i) && (unsigned char)str.at(0+24*i) == 0xFF){
+        power = ((unsigned char)str.at(20 + 24*i) + ((unsigned char)str.at(21 + 24*i) << 8)) >> 3;
+        current = ((unsigned char)str.at(22 + 24*i) + ((unsigned char)str.at(23 + 24*i) << 8)) * 0.0001;
+        gyr[0] = ((unsigned char)str.at(1 + 24*i) + ((unsigned char)str.at(2 + 24*i) << 8));
+        gyr[0] = (gyr[0] > 32767) ? (gyr[0] - 0x10000):gyr[0];
+        gyr[0] *= 0.0625;
+        gyr[1] = ((unsigned char)str.at(3 + 24*i) + ((unsigned char)str.at(4 + 24*i) << 8));
+        gyr[1] = (gyr[1] > 32767) ? (gyr[1] - 0x10000):gyr[1];
+        gyr[1] *= 0.0625;
+        gyr[2] = ((unsigned char)str.at(5 + 24*i) + ((unsigned char)str.at(6 + 24*i) << 8));
+        gyr[2] = (gyr[2] > 32767) ? (gyr[2] - 0x10000):gyr[2];
+        gyr[2] *= 0.0625;
+
+        acc[0] = ((unsigned char)str.at(7 + 24*i) + ((unsigned char)str.at(8 + 24*i) << 8) );
+        acc[0] = (acc[0] > 32767) ? (acc[0] - 0x10000):acc[0];
+        acc[0] /= 8192.0;
+        acc[1] = ((unsigned char)str.at(9 + 24*i) + ((unsigned char)str.at(10 + 24*i) << 8));
+        acc[1] = (acc[1] > 32767) ? (acc[1] - 0x10000):acc[1];
+        acc[1] /= 8192.0;
+        acc[2] = ((unsigned char)str.at(11 + 24*i) + ((unsigned char)str.at(12 + 24*i) << 8));
+        acc[2] = (acc[2] > 32767) ? (acc[2] - 0x10000):acc[2];
+        acc[2] /= 8192.0;
+
+        mag[0] = ((unsigned char)str.at(13 + 24*i) + ((unsigned char)str.at(14 + 24*i) << 8));
+        mag[0] = (mag[0] > 32767) ? (mag[0] - 0x10000):mag[0];
+        mag[0] *= 0.1;
+        mag[1] = ((unsigned char)str.at(15 + 24*i) + ((unsigned char)str.at(16 + 24*i) << 8));
+        mag[1] = (mag[1] > 32767) ? (mag[1] - 0x10000):mag[1];
+        mag[1] *= 0.1;
+        mag[2] = ((unsigned char)str.at(17 + 24*i) + ((unsigned char)str.at(18 + 24*i) << 8));
+        mag[2] = (mag[2] > 32767) ? (mag[2] - 0x10000):mag[2];
+        mag[2] *= 0.1;
+
+        qreal y = (axisXAcc->max() - axisXAcc->min()) / axisXAcc->tickCount();
+        m_x += y;
+        graphSeriesGyr[0]->append(m_x, gyr[0]);
+        graphSeriesGyr[1]->append(m_x, gyr[1]);
+        graphSeriesGyr[2]->append(m_x, gyr[2]);
+
+        graphSeriesAcc[0]->append(m_x, acc[0]);
+        graphSeriesAcc[1]->append(m_x, acc[1]);
+        graphSeriesAcc[2]->append(m_x, acc[2]);
+
+        graphSeriesMag[0]->append(m_x, mag[0]);
+        graphSeriesMag[1]->append(m_x, mag[1]);
+        graphSeriesMag[2]->append(m_x, mag[2]);
+
+        graphSeriesPm[0]->append(m_x, power);
+
+        if (m_x > axisXAcc->max()) {
+            axisXAcc->setMax(m_x);
+            axisXAcc->setMin(m_x - X_RANGE_COUNT);
+
+            axisXGyr->setMax(m_x);
+            axisXGyr->setMin(m_x - X_RANGE_COUNT);
+
+            axisXMag->setMax(m_x);
+            axisXMag->setMin(m_x - X_RANGE_COUNT);
+
+            axisXPm->setMax(m_x);
+            axisXPm->setMin(m_x - X_RANGE_COUNT);
+        }
+
+        if (graphSeriesGyr[0]->count() > X_RANGE_COUNT) {
+            graphSeriesGyr[0]->remove(0);
+            graphSeriesGyr[1]->remove(0);
+            graphSeriesGyr[2]->remove(0);
+        }
+
+        if (graphSeriesAcc[0]->count() > X_RANGE_COUNT) {
+            graphSeriesAcc[0]->remove(0);
+            graphSeriesAcc[1]->remove(0);
+            graphSeriesAcc[2]->remove(0);
+        }
+
+        if (graphSeriesMag[0]->count() > X_RANGE_COUNT) {
+            graphSeriesMag[0]->remove(0);
+            graphSeriesMag[1]->remove(0);
+            graphSeriesMag[2]->remove(0);
+        }
+
+        if (graphSeriesPm[0]->count() > X_RANGE_COUNT) {
+            graphSeriesPm[0]->remove(0);
+        }
+        i++;
+    }
+#if 0
     bool okx, oky, okz;
     /* Response from M4 will be a string of form "acc?x?y?z" */
     QStringList list = str.split(',');
@@ -250,7 +430,7 @@ void LpdGraphs::m4_processData(const QString &str)
             if (QString::compare(list[i + 0], "mag") != 0)
                 return;
             break;
-        case alti:
+        case power:
             if (QString::compare(list[i + 0], "alti") != 0)
                 return;
             break;
@@ -267,7 +447,7 @@ void LpdGraphs::m4_processData(const QString &str)
             return;
 
         qreal val3 = 0;
-        if (index_graph != alti) {
+        if (index_graph != power) {
             val3 = list.at(i + 3).toFloat(&okz);
             if (okz == false)
                 return;
@@ -275,43 +455,67 @@ void LpdGraphs::m4_processData(const QString &str)
 
         //qDebug().nospace() << str << "|" << val1 << " " << val2 << " " << val3;
 
-        qreal y = (axisX->max() - axisX->min()) / axisX->tickCount();
+        qreal y = (axisXAcc->max() - axisXAcc->min()) / axisXAcc->tickCount();
         m_x += y;
         switch (index_graph) {
         case gyro:
-            graphSeries1->append(m_x, val1);
-            graphSeries2->append(m_x, val2);
-            graphSeries3->append(m_x, val3);
+            graphSeriesGyr[0]->append(m_x, val1);
+            graphSeriesGyr[1]->append(m_x, val2);
+            graphSeriesGyr[2]->append(m_x, val3);
             break;
         case accl:
-            graphSeries1->append(m_x, val1);
-            graphSeries2->append(m_x, val2);
-            graphSeries3->append(m_x, val3);
+            graphSeriesAcc[0]->append(m_x, val1);
+            graphSeriesAcc[1]->append(m_x, val2);
+            graphSeriesAcc[2]->append(m_x, val3);
             break;
         case magneto:
-            graphSeries1->append(m_x, val1);
-            graphSeries2->append(m_x, val2);
-            graphSeries3->append(m_x, val3);
-            break;
-        case alti:
-            graphSeries1->append(m_x, val1);
-            graphSeries2->append(m_x, val2);
+            graphSeriesMag[0]->append(m_x, val1);
+            graphSeriesMag[1]->append(m_x, val2);
+            graphSeriesMag[2]->append(m_x, val3);
             break;
         default:
             break;
         }
 
-        if (m_x > axisX->max()) {
-            axisX->setMax(m_x);
-            axisX->setMin(m_x - X_RANGE_COUNT);
+        if (m_x > axisXAcc->max()) {
+            axisXAcc->setMax(m_x);
+            axisXAcc->setMin(m_x - X_RANGE_COUNT);
+
+            axisXGyr->setMax(m_x);
+            axisXGyr->setMin(m_x - X_RANGE_COUNT);
+
+            axisXMag->setMax(m_x);
+            axisXMag->setMin(m_x - X_RANGE_COUNT);
+
+            axisXPm->setMax(m_x);
+            axisXPm->setMin(m_x - X_RANGE_COUNT);
         }
 
-        if (graphSeries1->count() > X_RANGE_COUNT) {
-            graphSeries1->remove(0);
-            graphSeries2->remove(0);
-            graphSeries3->remove(0);
+        if (graphSeriesGyr[0]->count() > X_RANGE_COUNT) {
+            graphSeriesGyr[0]->remove(0);
+            graphSeriesGyr[1]->remove(0);
+            graphSeriesGyr[2]->remove(0);
+        }
+
+        if (graphSeriesAcc[0]->count() > X_RANGE_COUNT) {
+            graphSeriesAcc[0]->remove(0);
+            graphSeriesAcc[1]->remove(0);
+            graphSeriesAcc[2]->remove(0);
+        }
+
+        if (graphSeriesMag[0]->count() > X_RANGE_COUNT) {
+            graphSeriesMag[0]->remove(0);
+            graphSeriesMag[1]->remove(0);
+            graphSeriesMag[2]->remove(0);
+        }
+
+        if (graphSeriesPm[0]->count() > X_RANGE_COUNT) {
+            graphSeriesPm[0]->remove(0);
+            graphSeriesPm[1]->remove(0);
+            graphSeriesPm[2]->remove(0);
         }
     }
+#endif
 }
 
 void LpdGraphs::handleButtonColorChange(int button)
@@ -328,6 +532,9 @@ void LpdGraphs::handleButtonColorChange(int button)
         bPalette = magnetoButton->palette();
         bPalette.setColor(QPalette::Button, QRgb(0x00508c));
         magnetoButton->setPalette(bPalette);
+        bPalette = pmButton->palette();
+        bPalette.setColor(QPalette::Button, QRgb(0x00508c));
+        pmButton->setPalette(bPalette);
         break;
     case gyro:
         bPalette = accButton->palette();
@@ -339,6 +546,9 @@ void LpdGraphs::handleButtonColorChange(int button)
         bPalette = magnetoButton->palette();
         bPalette.setColor(QPalette::Button, QRgb(0x00508c));
         magnetoButton->setPalette(bPalette);
+        bPalette = pmButton->palette();
+        bPalette.setColor(QPalette::Button, QRgb(0x00508c));
+        pmButton->setPalette(bPalette);
         break;
     case magneto:
         bPalette = accButton->palette();
@@ -350,8 +560,23 @@ void LpdGraphs::handleButtonColorChange(int button)
         bPalette = magnetoButton->palette();
         bPalette.setColor(QPalette::Button, QRgb(0x004664));
         magnetoButton->setPalette(bPalette);
+        bPalette = pmButton->palette();
+        bPalette.setColor(QPalette::Button, QRgb(0x00508c));
+        pmButton->setPalette(bPalette);
         break;
-    case alti:
+    case power:
+        bPalette = accButton->palette();
+        bPalette.setColor(QPalette::Button, QRgb(0x00508c));
+        accButton->setPalette(bPalette);
+        bPalette = gyroButton->palette();
+        bPalette.setColor(QPalette::Button, QRgb(0x00508c));
+        gyroButton->setPalette(bPalette);
+        bPalette = magnetoButton->palette();
+        bPalette.setColor(QPalette::Button, QRgb(0x00508c));
+        magnetoButton->setPalette(bPalette);
+        bPalette = pmButton->palette();
+        bPalette.setColor(QPalette::Button, QRgb(0x004664));
+        pmButton->setPalette(bPalette);
         break;
     default:
         break;
@@ -374,23 +599,30 @@ void LpdGraphs::handleChartLabelText(int graph)
         break;
     case gyro:
         chartLabel->clear();
-        chartLabel->setTextColor(graphSeries1->pen().color());
+        chartLabel->setTextColor(graphSeriesGyr[0]->pen().color());
         chartLabel->setText("\n   X °/s");
-        chartLabel->setTextColor(graphSeries2->pen().color());
+        chartLabel->setTextColor(graphSeriesGyr[1]->pen().color());
         chartLabel->append("\n   Y °/s");
-        chartLabel->setTextColor(graphSeries3->pen().color());
+        chartLabel->setTextColor(graphSeriesGyr[2]->pen().color());
         chartLabel->append("\n   Z °/s");
         break;
     case magneto:
         chartLabel->clear();
-        chartLabel->setTextColor(graphSeries1->pen().color());
+        chartLabel->setTextColor(graphSeriesMag[0]->pen().color());
         chartLabel->setText("\n     X  °");
-        chartLabel->setTextColor(graphSeries2->pen().color());
+        chartLabel->setTextColor(graphSeriesMag[1]->pen().color());
         chartLabel->append("\n     Y  °");
-        chartLabel->setTextColor(graphSeries3->pen().color());
+        chartLabel->setTextColor(graphSeriesMag[2]->pen().color());
         chartLabel->append("\n     Z  °");
         break;
-    case alti:
+    case power:
+        chartLabel->clear();
+        chartLabel->setTextColor(graphSeriesMag[0]->pen().color());
+        chartLabel->setText("\n     mW  ");
+        /*   chartLabel->setTextColor(graphSeriesMag[1]->pen().color());
+        chartLabel->append("\n      mAh");
+        chartLabel->setTextColor(graphSeriesMag[2]->pen().color());
+        chartLabel->append("\n      A  ");*/
         break;
     default:
         break;
@@ -401,16 +633,14 @@ void LpdGraphs::handleChartLabelText(int graph)
 void LpdGraphs::handleGyroButton()
 {
     index_graph = gyro;
-    graphSeries1->clear();
-    graphSeries2->clear();
-    graphSeries3->clear();
     handleButtonColorChange(gyro);
     handleChartLabelText(gyro);
     gyroButton->setDown(true);
     accButton->setDown(false);
     magnetoButton->setDown(false);
-    altiButton->setDown(false);
-    chart->axisY()->setRange(-180, 180);
+    pmButton->setDown(false);
+    chartGyr->axisY()->setRange(-180, 180);
+    stackedWidget->setCurrentIndex(index_graph);
     /* Ask M4 to send Gyroscope data */
     emit m4_sendCommand("gyro");
 }
@@ -418,16 +648,14 @@ void LpdGraphs::handleGyroButton()
 void LpdGraphs::handleAccButton()
 {
     index_graph = accl;
-    graphSeries1->clear();
-    graphSeries2->clear();
-    graphSeries3->clear();
     handleButtonColorChange(accl);
     handleChartLabelText(accl);
     gyroButton->setDown(false);
     accButton->setDown(true);
     magnetoButton->setDown(false);
-    altiButton->setDown(false);
-    chart->axisY()->setRange(-4, 4);
+    pmButton->setDown(false);
+    chartAcc->axisY()->setRange(-4, 4);
+    stackedWidget->setCurrentIndex(index_graph);
     /* Ask M4 to send Accelerometer data */
     emit m4_sendCommand("acc");
 }
@@ -435,37 +663,36 @@ void LpdGraphs::handleAccButton()
 void LpdGraphs::handleMagnetoButton()
 {
     index_graph = magneto;
-    graphSeries1->clear();
-    graphSeries2->clear();
-    graphSeries3->clear();
     handleButtonColorChange(magneto);
     handleChartLabelText(magneto);
     gyroButton->setDown(false);
     accButton->setDown(false);
     magnetoButton->setDown(true);
-    altiButton->setDown(false);
-    chart->axisY()->setRange(-90, 90);
+    pmButton->setDown(false);
+    chartMag->axisY()->setRange(-50, 50);
+    stackedWidget->setCurrentIndex(index_graph);
     /* Ask M4 to send Magnetometer data */
     emit m4_sendCommand("mag");
 }
 
-void LpdGraphs::handleAltiButton()
+void LpdGraphs::handlePmButton()
 {
-    index_graph = alti;
-    graphSeries1->clear();
-    graphSeries2->clear();
-    graphSeries3->clear();
+    index_graph = power;
+    handleButtonColorChange(power);
+    handleChartLabelText(power);
     gyroButton->setDown(false);
     accButton->setDown(false);
     magnetoButton->setDown(false);
-    altiButton->setDown(true);
-    chart->axisY()->setRange(0, 1000);
+    pmButton->setDown(true);
+    chartPm->axisY()->setRange(0, 600);
+    stackedWidget->setCurrentIndex(index_graph);
     /* Ask M4 to send Altimeter data */
     emit m4_sendCommand("alti");
 }
 
 void LpdGraphs::handleSleepButton()
 {
+    openSleepFile();
     if (sleepFileActive) {
         QByteArray command("mem");
         sleepFile.write(command);

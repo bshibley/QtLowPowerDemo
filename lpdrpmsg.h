@@ -16,7 +16,7 @@ public slots:
     void sendCommand(const QByteArray& arg);
 
 signals:
-    void m4_dataAvailable(const QString& arg);
+    void m4_dataAvailable(const QByteArray& arg);
 
 private slots:
     void handleReadyRead();

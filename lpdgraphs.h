@@ -6,7 +6,6 @@
 #include <QtCharts/QChartView>
 #include <QtCharts/QSplineSeries>
 #include <QtCharts/QValueAxis>
-#include <QtCore/QTimer>
 #include <QtCore/QTextStream>
 
 QT_CHARTS_USE_NAMESPACE
@@ -19,11 +18,11 @@ public:
     virtual ~LpdGraphs();
 
 public slots:
-    void m4_processData(const QString& arg);
+    void m4_processData(const QByteArray& arg);
     void handleGyroButton();
     void handleAccButton();
     void handleMagnetoButton();
-    void handleAltiButton();
+    void handlePmButton();
     void handleSleepButton();
     void handleShutdownButton();
 
@@ -31,17 +30,24 @@ signals:
     void m4_sendCommand(const QByteArray& arg);
 
 private:
-    enum graph_index {gyro, accl, magneto, alti};
+    enum graph_index {gyro, accl, magneto, power};
     volatile quint8 index_graph;
 
     QFont buttonFont;
     QFont chartLabelFont;
     QWidget *window;
-    QChart *chart;
-    QSplineSeries *graphSeries1;
-    QSplineSeries *graphSeries2;
-    QSplineSeries *graphSeries3;
-    QValueAxis *axisX;
+    QChart *chartAcc;
+	QChart *chartMag;
+	QChart *chartGyr;
+	QChart *chartPm;
+    QSplineSeries *graphSeriesAcc[3];
+    QSplineSeries *graphSeriesMag[3];
+    QSplineSeries *graphSeriesGyr[3];
+    QSplineSeries *graphSeriesPm[3];
+    QValueAxis *axisXAcc;
+    QValueAxis *axisXMag;
+    QValueAxis *axisXGyr;
+    QValueAxis *axisXPm;
     QGraphicsScene *scene;
     QGraphicsView *view;
     QGraphicsPixmapItem *item;
@@ -49,13 +55,17 @@ private:
     QPushButton *gyroButton;
     QPushButton *accButton;
     QPushButton *magnetoButton;
-    QPushButton *altiButton;
+    QPushButton *pmButton;
     QPushButton *sleepButton;
     QPushButton *shutdownButton;
     QGroupBox *hgroupBox;
     QHBoxLayout *hboxLayout;
     QVBoxLayout *vboxLayout;
-    QChartView *chartView;
+	QStackedWidget *stackedWidget;
+    QChartView *chartAccView;
+    QChartView *chartMagView;
+    QChartView *chartGyrView;
+    QChartView *chartPmView;
 
     QGroupBox *hgroupChartBox;
     QHBoxLayout *hboxChartLayout;
@@ -63,7 +73,7 @@ private:
     QVBoxLayout *vboxChartLayout;
     QTextEdit *chartLabel;
 
-    const uint8_t X_RANGE_COUNT = 50;
+    const uint8_t X_RANGE_COUNT = 100;
     const uint8_t X_RANGE_MAX = X_RANGE_COUNT - 1;
     qreal m_x;
 
