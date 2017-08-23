@@ -67,7 +67,7 @@ public:
 Q_SIGNALS:
     void closed();
 
-pubilc Q_SLOTS:
+public Q_SLOTS:
     void sendData(QString str);
 
 private Q_SLOTS:
