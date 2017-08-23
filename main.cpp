@@ -29,6 +29,7 @@
 
 #include "lpdrpmsg.h"
 #include "lpdgraphs.h"
+#include "lpdserver.h"
 #include <signal.h>
 #include <unistd.h>
 
@@ -65,6 +66,25 @@ int main(int argc, char *argv[])
 
     LpdRpmsg LpdRpmsg(&serialPort);
     LpdGraphs LpdGraph;
+
+    QCommandLineParser parser;
+    parser.setApplicationDescription("QtWebSockets example: lpdserver");
+    parser.addHelpOption();
+
+    QCommandLineOption dbgOption(QStringList() << "d" << "debug",
+            QCoreApplication::translate("main", "Debug output [default: off]."));
+    parser.addOption(dbgOption);
+    QCommandLineOption portOption(QStringList() << "p" << "port",
+            QCoreApplication::translate("main", "Port for lpdserver [default: 1234]."),
+            QCoreApplication::translate("main", "port"), QLatin1Literal("1234"));
+    parser.addOption(portOption);
+    parser.process(a);
+    bool debug = parser.isSet(dbgOption);
+    int port = parser.value(portOption).toInt();
+
+    LpdServer LpdServer(port, debug);
+    QObject::connect(&LpdServer, &LpdServer::closed, &a, &QCoreApplication::quit);
+    QObject::connect(&LpdRpmsg, &LpdGraphs::m4_dataAvailable, &LpdServer, &LpdServer::sendData);
 
     QObject::connect(&LpdRpmsg, &LpdRpmsg::m4_dataAvailable, &LpdGraph, &LpdGraphs::m4_processData);
     QObject::connect(&LpdGraph, &LpdGraphs::m4_sendCommand, &LpdRpmsg, &LpdRpmsg::sendCommand);

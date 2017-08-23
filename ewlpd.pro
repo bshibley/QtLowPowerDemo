@@ -1,13 +1,15 @@
-QT += charts serialport
+QT += core websockets charts serialport
 
 SOURCES += \
     main.cpp \
     lpdrpmsg.cpp \
-    lpdgraphs.cpp
+    lpdgraphs.cpp \
+    lpdserver.cpp
 
 HEADERS += \
     lpdrpmsg.h \
-    lpdgraphs.h
+    lpdgraphs.h \
+    lpdserver.h
 
 target.path = /usr/bin
 INSTALLS += target

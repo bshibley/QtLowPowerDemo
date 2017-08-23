@@ -29,6 +29,7 @@ public slots:
 
 signals:
     void m4_sendCommand(const QByteArray& arg);
+    void server_sendCommand(const QString& data);
 
 private:
     enum graph_index {gyro, accl, magneto, alti};

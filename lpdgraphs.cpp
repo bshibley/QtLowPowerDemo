@@ -273,6 +273,7 @@ void LpdGraphs::m4_processData(const QString &str)
                 return;
         }
 
+        //emit server_sendData("");
         //qDebug().nospace() << str << "|" << val1 << " " << val2 << " " << val3;
 
         qreal y = (axisX->max() - axisX->min()) / axisX->tickCount();
