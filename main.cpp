@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
     QSerialPort serialPort;
 
     catchUnixSignals({SIGQUIT, SIGINT, SIGTERM, SIGHUP, SIGKILL});
-    serialPort.setPortName("/dev/ttyRPMSG");
+    serialPort.setPortName("/dev/ttyRPMSG0");
     if (!serialPort.open(QIODevice::ReadWrite)) {
         QMessageBox msgBox;
         msgBox.setText("Failed to open ttyRPMSG port");
