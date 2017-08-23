@@ -374,6 +374,8 @@ void LpdGraphs::m4_processData(const QByteArray &str)
 
         graphSeriesPm[0]->append(m_x, power);
 
+        emit server_sendData(QString::number(power));
+
         if (m_x > axisXAcc->max()) {
             axisXAcc->setMax(m_x);
             axisXAcc->setMin(m_x - X_RANGE_COUNT);

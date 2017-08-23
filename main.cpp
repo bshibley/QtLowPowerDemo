@@ -84,7 +84,8 @@ int main(int argc, char *argv[])
 
     LpdServer LpdServer(port, debug);
     QObject::connect(&LpdServer, &LpdServer::closed, &a, &QCoreApplication::quit);
-    QObject::connect(&LpdRpmsg, &LpdRpmsg::m4_dataAvailable, &LpdServer, &LpdServer::sendData);
+    //QObject::connect(&LpdRpmsg, &LpdRpmsg::m4_dataAvailable, &LpdServer, &LpdServer::sendData);
+    QObject::connect(&LpdGraph, &LpdGraphs::server_sendData, &LpdServer, &LpdServer::sendData);
 
     QObject::connect(&LpdRpmsg, &LpdRpmsg::m4_dataAvailable, &LpdGraph, &LpdGraphs::m4_processData);
     QObject::connect(&LpdGraph, &LpdGraphs::m4_sendCommand, &LpdRpmsg, &LpdRpmsg::sendCommand);
